@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RemindU</title>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-light: #EEF0FF;
+      --danger: #FF5C5C;
+      --success: #34D399;
+      --text: #1a1a2e;
+      --subtext: #6b7280;
+      --bg: #f9f9fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--primary); }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      font-size: 13px; color: var(--subtext); text-decoration: none;
+      padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+    }
+    nav a:hover, nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+    .form-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 20px; margin-bottom: 24px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .form-card h3 {
+      font-size: 13px; font-weight: 600; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;
+    }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { font-size: 12px; color: var(--subtext); display: block; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 14px; color: var(--text);
+      background: var(--bg); outline: none; transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    textarea { resize: none; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: var(--danger); color: white; padding: 6px 10px; font-size: 13px; }
+    .section-title {
+      font-size: 13px; font-weight: 600; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+    }
+    .task-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px; transition: transform 0.15s;
+    }
+    .task-card:hover { transform: translateY(-1px); }
+    input[type="checkbox"] {
+      width: 18px; height: 18px; margin-top: 3px;
+      accent-color: var(--primary); cursor: pointer; flex-shrink: 0;
+    }
+    .task-info { flex: 1; }
+    .task-judul { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .task-judul.selesai { text-decoration: line-through; color: var(--subtext); }
+    .task-notes { font-size: 13px; color: var(--subtext); margin-bottom: 6px; }
+    .task-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .task-date { font-size: 12px; color: var(--subtext); }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: white; }
+    .empty { text-align: center; padding: 40px; color: var(--subtext); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📝 RemindU</h1>
+    <nav>
+      <a href="index.html" class="active">Tasks</a>
+      <a href="subtasks.html">Sub Tasks</a>
+      <a href="kategori.html">Kategori</a>
+      <a href="notifikasi.html">Notifikasi</a>
+      <a href="profil.html">Profil</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="form-card">
+      <h3>Tambah Task</h3>
+      <div class="form-group">
+        <label>Judul</label>
+        <input type="text" id="judul" placeholder="Contoh: Belajar Express.js">
+      </div>
+      <div class="form-group">
+        <label>Catatan</label>
+        <textarea id="notes" rows="2" placeholder="Tambahkan catatan..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Deadline</label>
+        <input type="datetime-local" id="due_date">
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select id="id_kategori">
+          <option value="13">Study</option>
+          <option value="14">Personal</option>
+          <option value="15">Health</option>
+          <option value="16">Work</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="tambahTask()">+ Tambah Task</button>
+    </div>
+    <div class="section-title">Daftar Task</div>
+    <div id="task-list"></div>
+  </div>
+  <script>
+    const API = 'http://localhost:3000/api';
+    const ID_PENGGUNA = 6;
+    async function loadTasks() {
+      const res = await fetch(`${API}/tasks/${ID_PENGGUNA}`);
+      const tasks = await res.json();
+      const container = document.getElementById('task-list');
+      if (tasks.length === 0) {
+        container.innerHTML = '<div class="empty">Belum ada task. Tambahkan task pertamamu! 🎯</div>';
+        return;
+      }
+      container.innerHTML = tasks.map(task => `
+        <div class="task-card">
+          <input type="checkbox" ${task.selesai ? 'checked' : ''}
+            onchange="updateTask(${task.id_task}, this.checked)">
+          <div class="task-info">
+            <div class="task-judul ${task.selesai ? 'selesai' : ''}">${task.judul}</div>
+            ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ''}
+            <div class="task-meta">
+              <span class="task-date">📅 ${new Date(task.due_date).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'})}</span>
+              <span class="badge" style="background:${task.warna_hex}">${task.nama_kategori}</span>
+            </div>
+          </div>
+          <button class="btn btn-danger" onclick="hapusTask(${task.id_task})">🗑️</button>
+        </div>
+      `).join('');
+    }
+    async function tambahTask() {
+      const judul = document.getElementById('judul').value.trim();
+      const notes = document.getElementById('notes').value;
+      const due_date = document.getElementById('due_date').value;
+      const id_kategori = document.getElementById('id_kategori').value;
+      if (!judul) return alert('Judul tidak boleh kosong!');
+      await fetch(`${API}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_pengguna: ID_PENGGUNA, judul, notes, due_date, remind_at: due_date, id_kategori })
+      });
+      document.getElementById('judul').value = '';
+      document.getElementById('notes').value = '';
+      loadTasks();
+    }
+    async function updateTask(id_task, selesai) {
+      await fetch(`${API}/tasks/${id_task}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selesai: selesai ? 1 : 0 })
+      });
+      loadTasks();
+    }
+    async function hapusTask(id_task) {
+      if (!confirm('Hapus task ini?')) return;
+      await fetch(`${API}/tasks/${id_task}`, { method: 'DELETE' });
+      loadTasks();
+    }
+    loadTasks();
+  </script>
+</body>
+</html>

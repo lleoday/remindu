@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RemindU - Notifikasi</title>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-light: #EEF0FF;
+      --text: #1a1a2e;
+      --subtext: #6b7280;
+      --bg: #f9f9fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--primary); }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      font-size: 13px; color: var(--subtext); text-decoration: none;
+      padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+    }
+    nav a:hover, nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+    .section-title {
+      font-size: 13px; font-weight: 600; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+    }
+    .notif-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      display: flex; gap: 12px; align-items: flex-start; transition: transform 0.15s;
+    }
+    .notif-card:hover { transform: translateY(-1px); }
+    .notif-card.belum-baca { border-left: 4px solid var(--primary); }
+    .notif-icon { font-size: 24px; flex-shrink: 0; }
+    .notif-info { flex: 1; }
+    .notif-judul { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .notif-pesan { font-size: 13px; color: var(--subtext); margin-bottom: 6px; }
+    .notif-waktu { font-size: 11px; color: #aaa; }
+    .badge-tipe {
+      font-size: 11px; padding: 2px 8px; border-radius: 20px;
+      font-weight: 600; color: white; display: inline-block; margin-bottom: 6px;
+    }
+    .btn-baca {
+      font-size: 12px; padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 6px; background: white; cursor: pointer; color: var(--subtext);
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-baca:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+    .empty { text-align: center; padding: 40px; color: var(--subtext); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📝 RemindU</h1>
+    <nav>
+      <a href="index.html">Tasks</a>
+      <a href="subtasks.html">Sub Tasks</a>
+      <a href="kategori.html">Kategori</a>
+      <a href="notifikasi.html" class="active">Notifikasi</a>
+      <a href="profil.html">Profil</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="section-title">Notifikasi</div>
+    <div id="notif-list"></div>
+  </div>
+  <script>
+    const API = 'http://localhost:3000/api';
+    const ID_PENGGUNA = 6;
+    const tipeConfig = {
+      deadline:    { icon: '⏰', color: '#FF5C5C' },
+      reminder:    { icon: '🔔', color: '#FBBF24' },
+      system:      { icon: '⚙️', color: '#6b7280' },
+      motivasi:    { icon: '🔥', color: '#6C63FF' },
+      achievement: { icon: '🏆', color: '#34D399' },
+    };
+    async function loadNotifikasi() {
+      const res = await fetch(`${API}/notifikasi/${ID_PENGGUNA}`);
+      const data = await res.json();
+      const container = document.getElementById('notif-list');
+      if (data.length === 0) {
+        container.innerHTML = '<div class="empty">Tidak ada notifikasi 🎉</div>';
+        return;
+      }
+      container.innerHTML = data.map(n => {
+        const cfg = tipeConfig[n.tipe] || tipeConfig.system;
+        return `
+          <div class="notif-card ${n.status_baca ? '' : 'belum-baca'}">
+            <div class="notif-icon">${cfg.icon}</div>
+            <div class="notif-info">
+              <span class="badge-tipe" style="background:${cfg.color}">${n.tipe}</span>
+              <div class="notif-judul">${n.judul_notif}</div>
+              <div class="notif-pesan">${n.pesan}</div>
+              <div class="notif-waktu">${new Date(n.dikirim_pada).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+            ${!n.status_baca ? `<button class="btn-baca" onclick="tandaiBaca(${n.id_notif})">Tandai Dibaca</button>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+    async function tandaiBaca(id_notif) {
+      await fetch(`${API}/notifikasi/${id_notif}/baca`, { method: 'PUT' });
+      loadNotifikasi();
+    }
+    loadNotifikasi();
+  </script>
+</body>
+</html>

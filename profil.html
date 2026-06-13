@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RemindU - Profil</title>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-light: #EEF0FF;
+      --text: #1a1a2e;
+      --subtext: #6b7280;
+      --bg: #f9f9fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--primary); }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      font-size: 13px; color: var(--subtext); text-decoration: none;
+      padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+    }
+    nav a:hover, nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+    .profile-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border);
+      text-align: center; margin-bottom: 20px;
+    }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--primary); color: white;
+      font-size: 32px; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 16px;
+    }
+    .profile-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .profile-email { font-size: 14px; color: var(--subtext); }
+    .form-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .form-card h3 {
+      font-size: 13px; font-weight: 600; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;
+    }
+    .info-row {
+      display: flex; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--subtext); }
+    .info-value { font-weight: 500; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📝 RemindU</h1>
+    <nav>
+      <a href="index.html">Tasks</a>
+      <a href="subtasks.html">Sub Tasks</a>
+      <a href="kategori.html">Kategori</a>
+      <a href="notifikasi.html">Notifikasi</a>
+      <a href="profil.html" class="active">Profil</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="profile-card">
+      <div class="avatar" id="avatar-initials">?</div>
+      <div class="profile-name" id="profile-name">Memuat...</div>
+      <div class="profile-email" id="profile-email"></div>
+    </div>
+    <div class="form-card">
+      <h3>Informasi Akun</h3>
+      <div class="info-row">
+        <span class="info-label">Nama Depan</span>
+        <span class="info-value" id="info-nama-depan">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Nama Belakang</span>
+        <span class="info-value" id="info-nama-belakang">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="info-email">-</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API = 'http://localhost:3000/api';
+    const ID_PENGGUNA = 6;
+    async function loadProfil() {
+      const res = await fetch(`${API}/pengguna/${ID_PENGGUNA}`);
+      const user = await res.json();
+      document.getElementById('avatar-initials').textContent = user.nama_depan[0].toUpperCase();
+      document.getElementById('profile-name').textContent = `${user.nama_depan} ${user.nama_belakang}`;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('info-nama-depan').textContent = user.nama_depan;
+      document.getElementById('info-nama-belakang').textContent = user.nama_belakang;
+      document.getElementById('info-email').textContent = user.email;
+    }
+    loadProfil();
+  </script>
+</body>
+</html>

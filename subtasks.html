@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RemindU - Sub Tasks</title>
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-light: #EEF0FF;
+      --danger: #FF5C5C;
+      --text: #1a1a2e;
+      --subtext: #6b7280;
+      --bg: #f9f9fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--primary); }
+    nav { display: flex; gap: 12px; }
+    nav a {
+      font-size: 13px; color: var(--subtext); text-decoration: none;
+      padding: 6px 12px; border-radius: 8px; transition: background 0.2s;
+    }
+    nav a:hover, nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+    .section-title {
+      font-size: 13px; font-weight: 600; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+    }
+    .task-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 16px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .task-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .task-judul { font-size: 15px; font-weight: 600; flex: 1; }
+    .badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; color: white;
+    }
+    .subtask-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+    }
+    .subtask-item:last-of-type { border-bottom: none; }
+    .subtask-nama { flex: 1; font-size: 14px; }
+    .subtask-nama.selesai { text-decoration: line-through; color: var(--subtext); }
+    input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;
+    }
+    .add-subtask { display: flex; gap: 8px; margin-top: 12px; }
+    .add-subtask input {
+      flex: 1; padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; outline: none;
+      background: var(--bg); color: var(--text);
+    }
+    .add-subtask input:focus { border-color: var(--primary); }
+    .btn {
+      padding: 8px 14px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: var(--danger); color: white; padding: 4px 8px; font-size: 12px; }
+    .empty { text-align: center; padding: 40px; color: var(--subtext); font-size: 14px; }
+    .progress-bar {
+      height: 6px; background: var(--border); border-radius: 10px;
+      margin-bottom: 12px; overflow: hidden;
+    }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 10px; transition: width 0.3s; }
+    .progress-label { font-size: 12px; color: var(--subtext); margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📝 RemindU</h1>
+    <nav>
+      <a href="index.html">Tasks</a>
+      <a href="subtasks.html" class="active">Sub Tasks</a>
+      <a href="kategori.html">Kategori</a>
+      <a href="notifikasi.html">Notifikasi</a>
+      <a href="profil.html">Profil</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="section-title">Sub Tasks per Task</div>
+    <div id="task-list"></div>
+  </div>
+  <script>
+    const API = 'http://localhost:3000/api';
+    const ID_PENGGUNA = 6;
+    async function loadTasks() {
+      const res = await fetch(`${API}/tasks/${ID_PENGGUNA}`);
+      const tasks = await res.json();
+      const container = document.getElementById('task-list');
+      if (tasks.length === 0) {
+        container.innerHTML = '<div class="empty">Belum ada task.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      for (const task of tasks) {
+        const subtaskRes = await fetch(`${API}/subtasks/${task.id_task}`);
+        const subtasks = await subtaskRes.json();
+        const selesai = subtasks.filter(s => s.status_selesai).length;
+        const total = subtasks.length;
+        const persen = total > 0 ? Math.round((selesai / total) * 100) : 0;
+        const div = document.createElement('div');
+        div.className = 'task-card';
+        div.innerHTML = `
+          <div class="task-header">
+            <div class="task-judul">${task.judul}</div>
+            <span class="badge" style="background:${task.warna_hex}">${task.nama_kategori}</span>
+          </div>
+          ${total > 0 ? `
+            <div class="progress-label">${selesai}/${total} selesai (${persen}%)</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${persen}%"></div></div>
+          ` : ''}
+          <div id="subtasks-${task.id_task}">
+            ${subtasks.map(s => `
+              <div class="subtask-item">
+                <input type="checkbox" ${s.status_selesai ? 'checked' : ''}
+                  onchange="updateSubtask(${s.id_subtask}, this.checked)">
+                <span class="subtask-nama ${s.status_selesai ? 'selesai' : ''}">${s.nama_subtask}</span>
+                <button class="btn btn-danger" onclick="hapusSubtask(${s.id_subtask})">🗑️</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="add-subtask">
+            <input type="text" id="input-${task.id_task}" placeholder="Tambah sub task...">
+            <button class="btn btn-primary" onclick="tambahSubtask(${task.id_task})">+ Add</button>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    }
+    async function tambahSubtask(id_task) {
+      const input = document.getElementById(`input-${id_task}`);
+      const nama = input.value.trim();
+      if (!nama) return alert('Nama sub task tidak boleh kosong!');
+      await fetch(`${API}/subtasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_task, nama_subtask: nama })
+      });
+      input.value = '';
+      loadTasks();
+    }
+    async function updateSubtask(id_subtask, status_selesai) {
+      await fetch(`${API}/subtasks/${id_subtask}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status_selesai: status_selesai ? 1 : 0 })
+      });
+      loadTasks();
+    }
+    async function hapusSubtask(id_subtask) {
+      if (!confirm('Hapus sub task ini?')) return;
+      await fetch(`${API}/subtasks/${id_subtask}`, { method: 'DELETE' });
+      loadTasks();
+    }
+    loadTasks();
+  </script>
+</body>
+</html>
